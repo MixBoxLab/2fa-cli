@@ -50,7 +50,7 @@ curl -fsSL https://raw.githubusercontent.com/MixBoxLab/2fa-cli/main/install.sh |
 要查看所有账户当前的 TOTP 验证码，只需直接运行命令，不带任何子命令：
 
 ```sh
-2fa-cli
+2fa
 ```
 
 **输出示例:**
@@ -65,13 +65,13 @@ google               123456     Expires in: 21s
 使用 `add` 子命令来添加一个新账户。密钥应该是您的服务提供商所提供的 Base32 编码的字符串。
 
 ```sh
-2fa-cli add <账户名> <密钥>
+2fa add <账户名> <密钥>
 ```
 
 **示例:**
 
 ```sh
-2fa-cli add github GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ
+2fa add github GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ
 ```
 
 ### 列出账户
@@ -79,7 +79,7 @@ google               123456     Expires in: 21s
 要查看所有已保存账户的名称列表，使用 `list` 子命令：
 
 ```sh
-2fa-cli list
+2fa list
 ```
 
 **输出示例:**
@@ -95,13 +95,13 @@ Available accounts:
 要移除一个账户，使用 `remove` 子命令并指定账户名：
 
 ```sh
-2fa-cli remove <账户名>
+2fa remove <账户名>
 ```
 
 **示例:**
 
 ```sh
-2fa-cli remove github
+2fa remove github
 ```
 
 ## 从源码构建
@@ -112,7 +112,7 @@ Available accounts:
 cargo build --release
 ```
 
-生成的可执行文件将位于 `target/release/2fa-cli`。
+生成的可执行文件将位于 `target/release/2fa`。
 
 ## 许可证
 

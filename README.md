@@ -52,7 +52,7 @@ You can also download pre-built binaries from the [releases page](https://github
 To see the current TOTP codes for all your accounts, simply run the command without any subcommands:
 
 ```sh
-2fa-cli
+2fa
 ```
 
 **Example Output:**
@@ -67,13 +67,13 @@ google               123456     Expires in: 21s
 Use the `add` subcommand to add a new account. The secret key should be the Base32 encoded string provided by your service provider.
 
 ```sh
-2fa-cli add <ACCOUNT_NAME> <SECRET_KEY>
+2fa add <ACCOUNT_NAME> <SECRET_KEY>
 ```
 
 **Example:**
 
 ```sh
-2fa-cli add github GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ
+2fa add github GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ
 ```
 
 ### Listing Accounts
@@ -81,7 +81,7 @@ Use the `add` subcommand to add a new account. The secret key should be the Base
 To see a list of all saved account names, use the `list` subcommand:
 
 ```sh
-2fa-cli list
+2fa list
 ```
 
 **Example Output:**
@@ -97,13 +97,13 @@ Available accounts:
 To remove an account, use the `remove` subcommand with the account name:
 
 ```sh
-2fa-cli remove <ACCOUNT_NAME>
+2fa remove <ACCOUNT_NAME>
 ```
 
 **Example:**
 
 ```sh
-2fa-cli remove github
+2fa remove github
 ```
 
 ## Building from Source
@@ -114,7 +114,7 @@ If you want to build the project without installing it, you can use:
 cargo build --release
 ```
 
-The executable will be located at `target/release/2fa-cli`.
+The executable will be located at `target/release/2fa`.
 
 ## License
 

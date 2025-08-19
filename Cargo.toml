@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "2fa-cli"
+name = "2fa"
 path = "src/main.rs"
 
 [dependencies]

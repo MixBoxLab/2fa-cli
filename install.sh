@@ -64,12 +64,12 @@ install_2fa_cli() {
     print_message $YELLOW "📦 最新版本: $version"
     
     # 构建下载 URL
-    local binary_name="2fa-cli"
+    local binary_name="2fa"
     if [[ "$platform" == *"windows"* ]]; then
-        binary_name="2fa-cli.exe"
+        binary_name="2fa.exe"
     fi
     
-    local download_url="https://github.com/your-username/2fa-cli/releases/download/${version}/2fa-cli-${platform}.tar.gz"
+    local download_url="https://github.com/MixBoxLab/2fa-cli/releases/download/${version}/2fa-cli-${platform}.tar.gz"
     
     # 创建临时目录
     local tmp_dir=$(mktemp -d)
@@ -101,14 +101,14 @@ install_2fa_cli() {
     mkdir -p "$install_dir"
     
     # 安装二进制文件
-    mv "$binary_name" "$install_dir/2fa-cli"
-    chmod +x "$install_dir/2fa-cli"
+    mv "$binary_name" "$install_dir/2fa"
+    chmod +x "$install_dir/2fa"
     
     # 清理临时文件
     cd - > /dev/null
     rm -rf "$tmp_dir"
     
-    print_message $GREEN "✅ 2FA CLI 已成功安装到 $install_dir/2fa-cli"
+    print_message $GREEN "✅ 2FA CLI 已成功安装到 $install_dir/2fa"
     
     # 检查 PATH
     if [[ ":$PATH:" != *":$install_dir:"* ]]; then
@@ -118,7 +118,7 @@ install_2fa_cli() {
         print_message $YELLOW "   然后运行: source ~/.bashrc (或对应的配置文件)"
     fi
     
-    print_message $GREEN "🎉 安装完成！您现在可以使用 '2fa-cli --help' 命令了"
+    print_message $GREEN "🎉 安装完成！您现在可以使用 '2fa --help' 命令了"
 }
 
 # 运行安装
