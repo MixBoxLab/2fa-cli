@@ -14,11 +14,23 @@ A simple, fast, and secure command-line tool for generating Time-Based One-Time 
 
 ## Installation
 
-You can install `2fa-cli` directly from the source using `cargo`.
+### Quick Install (Recommended)
+
+For users without Rust installed, you can install `2fa-cli` with a single command:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/MixBoxLab/2fa-cli/main/install.sh | sh
+```
+
+This script will automatically download the appropriate binary for your platform and install it to your local bin directory.
+
+### Install from Source
+
+If you have Rust installed, you can build and install from source:
 
 1.  Clone the repository:
     ```sh
-    git clone https://github.com/your-username/2fa-cli.git
+    git clone https://github.com/MixBoxLab/2fa-cli.git
     cd 2fa-cli
     ```
 
@@ -28,6 +40,10 @@ You can install `2fa-cli` directly from the source using `cargo`.
     ```
 
 This will compile the project and place the `2fa-cli` executable in your Cargo bin directory (`~/.cargo/bin`). Make sure this directory is in your shell's `PATH`.
+
+### Manual Download
+
+You can also download pre-built binaries from the [releases page](https://github.com/MixBoxLab/2fa-cli/releases).
 
 ## Usage
 

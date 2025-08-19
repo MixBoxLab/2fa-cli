@@ -12,11 +12,23 @@
 
 ## 安装
 
-您可以使用 `cargo` 从源码直接安装 `2fa-cli`。
+### 快速安装（推荐）
+
+对于没有安装 Rust 的用户，您可以使用一行命令安装 `2fa-cli`：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/MixBoxLab/2fa-cli/main/install.sh | sh
+```
+
+此脚本将自动下载适合您平台的二进制文件，并将其安装到您的本地 bin 目录。
+
+### 从源码安装
+
+如果您已安装 Rust，您可以从源码构建并安装：
 
 1.  克隆此仓库:
     ```sh
-    git clone https://github.com/your-username/2fa-cli.git
+    git clone https://github.com/MixBoxLab/2fa-cli.git
     cd 2fa-cli
     ```
 
@@ -26,6 +38,10 @@
     ```
 
 此命令将会编译项目，并将 `2fa-cli` 可执行文件放置在您的 Cargo `bin` 目录 (`~/.cargo/bin`) 下。请确保此目录已添加到您 shell 的 `PATH` 环境变量中。
+
+### 手动下载
+
+您也可以从 [发布页面](https://github.com/MixBoxLab/2fa-cli/releases) 下载预构建的二进制文件。
 
 ## 使用方法
 
