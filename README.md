@@ -62,6 +62,26 @@ github               981414     Expires in: 8s
 google               123456     Expires in: 21s
 ```
 
+### Live Watch Mode
+
+For a continuously updating display with real-time countdown and progress bar, use the `--watch` or `-w` flag:
+
+```sh
+2fa --watch
+```
+
+This will show:
+- 🔑 Real-time updating codes with color-coded countdown
+- ⏱️ Live countdown timer (green → yellow → red as time expires)
+- 📊 Progress bar showing time until next refresh
+- 🎯 Press Ctrl+C to exit gracefully
+
+**Watch Mode Features:**
+- Codes automatically refresh every 30 seconds
+- Color changes based on remaining time (green > 10s, yellow 5-10s, red < 5s)
+- Visual progress bar at the bottom
+- Clean terminal interface with live updates
+
 ### Adding an Account
 
 Use the `add` subcommand to add a new account. The secret key should be the Base32 encoded string provided by your service provider.
