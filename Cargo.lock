@@ -626,7 +626,7 @@ dependencies = [
 
 [[package]]
 name = "two_fa_cli"
-version = "0.1.0"
+version = "0.0.3"
 dependencies = [
  "anyhow",
  "base32",
