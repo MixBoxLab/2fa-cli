@@ -14,4 +14,6 @@ echo -e "${YELLOW}This will automatically bump the patch version and create a re
 echo
 
 # 运行完整的发布流程
-./release.sh patch
+# 获取脚本所在目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/release.sh" patch
