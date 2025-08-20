@@ -19,7 +19,7 @@ A simple, fast, and secure command-line tool for generating Time-Based One-Time 
 For users without Rust installed, you can install `2fa-cli` with a single command:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/MixBoxLab/2fa-cli/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/MixBoxLab/2fa-cli/main/scripts/install.sh | sh
 ```
 
 This script will automatically download the appropriate binary for your platform and install it to your local bin directory.
@@ -135,6 +135,33 @@ cargo build --release
 ```
 
 The executable will be located at `target/release/2fa`.
+
+## Development
+
+### Creating a Release
+
+For maintainers, we provide automated release scripts:
+
+```sh
+# Patch release (0.1.0 -> 0.1.1)
+./scripts/release.sh patch
+# or simply
+./scripts/quick-release.sh
+
+# Minor release (0.1.0 -> 0.2.0)
+./scripts/release.sh minor
+
+# Major release (0.1.0 -> 1.0.0)
+./scripts/release.sh major
+```
+
+The release script will:
+1. Check for uncommitted changes
+2. Update the version in `Cargo.toml`
+3. Run tests and build the project
+4. Commit the version bump
+5. Create and push a git tag
+6. Trigger GitHub Actions to build and publish releases
 
 ## License
 

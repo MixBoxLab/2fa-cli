@@ -44,7 +44,7 @@ detect_platform() {
 
 # 获取最新版本号
 get_latest_version() {
-    curl -s "https://api.github.com/repos/your-username/2fa-cli/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+    curl -s "https://api.github.com/repos/MixBoxLab/2fa-cli/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 }
 
 # 主安装函数

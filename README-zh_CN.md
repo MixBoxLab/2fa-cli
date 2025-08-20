@@ -17,7 +17,7 @@
 对于没有安装 Rust 的用户，您可以使用一行命令安装 `2fa-cli`：
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/MixBoxLab/2fa-cli/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/MixBoxLab/2fa-cli/main/scripts/install.sh | sh
 ```
 
 此脚本将自动下载适合您平台的二进制文件，并将其安装到您的本地 bin 目录。
@@ -133,6 +133,33 @@ cargo build --release
 ```
 
 生成的可执行文件将位于 `target/release/2fa`。
+
+## 开发
+
+### 创建发布版本
+
+对于维护者，我们提供了自动化发布脚本：
+
+```sh
+# 补丁版本发布 (0.1.0 -> 0.1.1)
+./scripts/release.sh patch
+# 或者简单地使用
+./scripts/quick-release.sh
+
+# 次要版本发布 (0.1.0 -> 0.2.0)
+./scripts/release.sh minor
+
+# 主要版本发布 (0.1.0 -> 1.0.0)
+./scripts/release.sh major
+```
+
+发布脚本将：
+1. 检查未提交的更改
+2. 更新 `Cargo.toml` 中的版本号
+3. 运行测试并构建项目
+4. 提交版本更新
+5. 创建并推送 git 标签
+6. 触发 GitHub Actions 构建并发布版本
 
 ## 许可证
 
