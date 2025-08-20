@@ -103,7 +103,7 @@ fn display_codes_once(config: &Config) -> Result<()> {
 
         let code = totp.generate_current()?;
         let remaining = 30 - (now % 30);
-        println!("{:<20} {:<10} Expires in: {}s", name, code, remaining);
+        println!("{:<20} {:<10} Expires in: {:02}s", name, code, remaining);
     }
     Ok(())
 }
@@ -155,30 +155,35 @@ fn display_codes_watch(config: &Config) -> Result<()> {
                 SetForegroundColor(Color::Cyan),
                 Print(format!("{:<10} ", code)),
                 SetForegroundColor(color),
-                Print(format!("⏱️  {}s", remaining)),
+                Print(format!("⏱️  {:02}s", remaining)),
                 ResetColor,
                 Print("\n")
             )?;
         }
         
-        // 在底部显示进度条
+        // 在底部显示进度条 - 左对齐布局
         let progress = 30 - remaining;
-        let bar_length = 40usize;
+        let bar_length = 30usize;
         let filled = (progress * bar_length as u64 / 30) as usize;
         let empty = bar_length - filled;
         
+        // 计算当前应该在哪一行（标题占2行，每个账户占1行）
+        let current_row = 2 + config.accounts.len() as u16 + 1;
+        
         execute!(
             io::stdout(),
-            Print("\n"),
+            cursor::MoveTo(0, current_row), // 移动到进度条行的最左侧
             SetForegroundColor(Color::DarkGrey),
-            Print("Progress: ["),
+            Print("["),
             SetForegroundColor(Color::Green),
             Print("█".repeat(filled)),
             SetForegroundColor(Color::DarkGrey),
             Print("·".repeat(empty)),
-            Print(format!("] {}s", remaining)),
+            Print("] "),
+            SetForegroundColor(Color::White),
+            Print(format!("{:02}s remaining", remaining)),
             ResetColor,
-            Print("                    ") // 清除行尾
+            terminal::Clear(ClearType::UntilNewLine) // 清除行尾
         )?;
         
         io::stdout().flush()?;
