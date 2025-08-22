@@ -1,6 +1,6 @@
 [package]
 name = "two_fa_cli"
-version = "0.0.4"
+version = "1.0.0"
 edition = "2021"
 description = "A simple, fast, and secure command-line tool for generating TOTP codes"
 authors = ["liam"]
