@@ -129,6 +129,7 @@ fn display_codes_watch(config: &Config) -> Result<()> {
         let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
         let remaining = 30 - (now % 30);
         
+        let mut row = 2u16;
         for (name, account) in &config.accounts {
             let secret_bytes = base32::decode(
                 base32::Alphabet::Rfc4648 { padding: false },
@@ -150,6 +151,7 @@ fn display_codes_watch(config: &Config) -> Result<()> {
             
             execute!(
                 io::stdout(),
+                cursor::MoveTo(0, row),
                 SetForegroundColor(Color::White),
                 Print(format!("{:<20} ", name)),
                 SetForegroundColor(Color::Cyan),
@@ -157,34 +159,45 @@ fn display_codes_watch(config: &Config) -> Result<()> {
                 SetForegroundColor(color),
                 Print(format!("⏱️  {:02}s", remaining)),
                 ResetColor,
-                Print("\n")
+                terminal::Clear(ClearType::UntilNewLine) // 清除行尾剩余内容
             )?;
+            row += 1;
         }
         
-        // 在底部显示进度条 - 左对齐布局
-        let progress = 30 - remaining;
-        let bar_length = 30usize;
-        let filled = (progress * bar_length as u64 / 30) as usize;
-        let empty = bar_length - filled;
-        
-        // 计算当前应该在哪一行（标题占2行，每个账户占1行）
-        let current_row = 2 + config.accounts.len() as u16 + 1;
-        
-        execute!(
-            io::stdout(),
-            cursor::MoveTo(0, current_row), // 移动到进度条行的最左侧
-            SetForegroundColor(Color::DarkGrey),
-            Print("["),
-            SetForegroundColor(Color::Green),
-            Print("█".repeat(filled)),
-            SetForegroundColor(Color::DarkGrey),
-            Print("·".repeat(empty)),
-            Print("] "),
-            SetForegroundColor(Color::White),
-            Print(format!("{:02}s remaining", remaining)),
-            ResetColor,
-            terminal::Clear(ClearType::UntilNewLine) // 清除行尾
-        )?;
+        // 只有当账户数量为1时才显示进度条，避免多个账户倒计时不同步的问题
+        if config.accounts.len() == 1 {
+            let progress = 30 - remaining;
+            let bar_length = 30usize;
+            let filled = (progress * bar_length as u64 / 30) as usize;
+            let empty = bar_length - filled;
+            
+            // 计算当前应该在哪一行（标题占2行，每个账户占1行）
+            let current_row = 2 + config.accounts.len() as u16 + 1;
+            
+            execute!(
+                io::stdout(),
+                cursor::MoveTo(0, current_row), // 移动到进度条行的最左侧
+                SetForegroundColor(Color::DarkGrey),
+                Print("["),
+                SetForegroundColor(Color::Green),
+                Print("█".repeat(filled)),
+                SetForegroundColor(Color::DarkGrey),
+                Print("·".repeat(empty)),
+                Print("] "),
+                SetForegroundColor(Color::White),
+                Print(format!("{:02}s remaining", remaining)),
+                ResetColor,
+                terminal::Clear(ClearType::UntilNewLine) // 清除行尾
+            )?;
+        } else {
+            // 多个账户时，清除进度条区域
+            let current_row = 2 + config.accounts.len() as u16 + 1;
+            execute!(
+                io::stdout(),
+                cursor::MoveTo(0, current_row),
+                terminal::Clear(ClearType::UntilNewLine)
+            )?;
+        }
         
         io::stdout().flush()?;
         
