@@ -10,6 +10,7 @@ A simple, fast, and secure command-line tool for generating Time-Based One-Time 
 - **List Accounts**: View all of your configured accounts.
 - **Remove Accounts**: Delete accounts you no longer need.
 - **Show Codes**: Display the current 2FA codes for all accounts, along with a countdown timer for expiration.
+- **One-Click Copy**: Copy verification codes to clipboard with simple commands or keyboard shortcuts.
 - **Secure Storage**: Secrets are stored locally in your system's standard configuration directory.
 
 ## Installation
@@ -81,6 +82,7 @@ This will show:
 - Color changes based on remaining time (green > 10s, yellow 5-10s, red < 5s)
 - Visual progress bar at the bottom
 - Clean terminal interface with live updates
+- **Keyboard shortcuts**: Press number keys (1-9) to instantly copy the corresponding account's code
 
 ### Adding an Account
 
@@ -125,6 +127,38 @@ To remove an account, use the `remove` subcommand with the account name:
 ```sh
 2fa remove github
 ```
+
+### Copying Codes to Clipboard
+
+#### Quick Copy Command
+
+Copy a specific account's verification code directly to your clipboard:
+
+```sh
+2fa --copy <ACCOUNT_NAME>
+```
+
+**Example:**
+
+```sh
+2fa --copy github
+```
+
+**Example Output:**
+
+```
+✅ 已复制 github 的验证码: 123456 到剪贴板
+```
+
+#### Interactive Copy in Watch Mode
+
+When using watch mode (`2fa --watch`), you can instantly copy any account's code by pressing the corresponding number key:
+
+- Press `1` to copy the first account's code
+- Press `2` to copy the second account's code
+- And so on...
+
+The system will display a confirmation message showing which code was copied.
 
 ## Building from Source
 

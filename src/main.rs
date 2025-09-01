@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
+use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use crossterm::{
     cursor,
     execute,
@@ -30,6 +31,10 @@ struct Cli {
     /// Watch mode: continuously update codes with live countdown
     #[arg(short, long)]
     watch: bool,
+    
+    /// Copy specific account code to clipboard
+    #[arg(short, long)]
+    copy: Option<String>,
 }
 
 #[derive(Subcommand)]
@@ -84,6 +89,26 @@ fn save_config(path: &PathBuf, config: &Config) -> Result<()> {
     Ok(())
 }
 
+fn copy_to_clipboard(text: &str) -> Result<()> {
+    let mut ctx = ClipboardContext::new()
+        .map_err(|e| anyhow::anyhow!("Failed to initialize clipboard: {}", e))?;
+    ctx.set_contents(text.to_owned())
+        .map_err(|e| anyhow::anyhow!("Failed to copy to clipboard: {}", e))?;
+    Ok(())
+}
+
+fn get_account_code(account: &Account) -> Result<String> {
+    let secret_bytes = base32::decode(
+        base32::Alphabet::Rfc4648 { padding: false },
+        &account.secret,
+    )
+    .context("Failed to decode secret. Is it valid Base32?")?;
+
+    let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret_bytes)?;
+    let code = totp.generate_current()?;
+    Ok(code)
+}
+
 fn display_codes_once(config: &Config) -> Result<()> {
     if config.accounts.is_empty() {
         println!("No accounts found. Use '2fa add <name> <secret>' to add one.");
@@ -92,19 +117,20 @@ fn display_codes_once(config: &Config) -> Result<()> {
 
     let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
 
+    println!("\n🔑 2FA Codes:");
+    println!("{}{}\n", "-".repeat(60), "-".repeat(10));
+    
+    let mut index = 1;
     for (name, account) in &config.accounts {
-        let secret_bytes = base32::decode(
-            base32::Alphabet::Rfc4648 { padding: false },
-            &account.secret,
-        )
-        .context("Failed to decode secret. Is it valid Base32?")?;
-
-        let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret_bytes)?;
-
-        let code = totp.generate_current()?;
+        let code = get_account_code(account)?;
         let remaining = 30 - (now % 30);
-        println!("{:<20} {:<10} Expires in: {:02}s", name, code, remaining);
+        println!("{}. {:<18} {:<10} ⏱️  {:02}s", index, name, code, remaining);
+        index += 1;
     }
+    
+    println!("\n💡 提示: 使用 '2fa --copy <账户名>' 复制特定账户的验证码到剪贴板");
+    println!("💡 提示: 使用 '2fa --watch' 进入实时模式，支持键盘快捷键复制");
+    
     Ok(())
 }
 
@@ -120,7 +146,13 @@ fn display_codes_watch(config: &Config) -> Result<()> {
     // 清屏
     execute!(io::stdout(), terminal::Clear(ClearType::All), cursor::MoveTo(0, 0))?;
     
-    println!("🔑 2FA Codes (Press Ctrl+C to exit)\n");
+    execute!(
+        io::stdout(),
+        cursor::MoveTo(0, 0),
+        Print("🔑 2FA Codes (Press Ctrl+C to exit)\n"),
+        cursor::MoveTo(0, 1),
+        Print(format!("💡 按数字键 1-{} 复制对应账户的验证码\n", config.accounts.len()))
+    )?;
     
     loop {
         // 移动到第三行开始显示内容
@@ -129,16 +161,10 @@ fn display_codes_watch(config: &Config) -> Result<()> {
         let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
         let remaining = 30 - (now % 30);
         
-        let mut row = 2u16;
+        let mut row = 3u16; // 改为3因为我们添加了一行说明
+        let mut index = 1;
         for (name, account) in &config.accounts {
-            let secret_bytes = base32::decode(
-                base32::Alphabet::Rfc4648 { padding: false },
-                &account.secret,
-            )
-            .context("Failed to decode secret. Is it valid Base32?")?;
-
-            let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret_bytes)?;
-            let code = totp.generate_current()?;
+            let code = get_account_code(account)?;
             
             // 根据剩余时间改变颜色
             let color = if remaining <= 5 {
@@ -152,8 +178,10 @@ fn display_codes_watch(config: &Config) -> Result<()> {
             execute!(
                 io::stdout(),
                 cursor::MoveTo(0, row),
+                SetForegroundColor(Color::DarkGrey),
+                Print(format!("{}. ", index)),
                 SetForegroundColor(Color::White),
-                Print(format!("{:<20} ", name)),
+                Print(format!("{:<18} ", name)),
                 SetForegroundColor(Color::Cyan),
                 Print(format!("{:<10} ", code)),
                 SetForegroundColor(color),
@@ -162,6 +190,7 @@ fn display_codes_watch(config: &Config) -> Result<()> {
                 terminal::Clear(ClearType::UntilNewLine) // 清除行尾剩余内容
             )?;
             row += 1;
+            index += 1;
         }
         
         // 只有当账户数量为1时才显示进度条，避免多个账户倒计时不同步的问题
@@ -171,8 +200,8 @@ fn display_codes_watch(config: &Config) -> Result<()> {
             let filled = (progress * bar_length as u64 / 30) as usize;
             let empty = bar_length - filled;
             
-            // 计算当前应该在哪一行（标题占2行，每个账户占1行）
-            let current_row = 2 + config.accounts.len() as u16 + 1;
+            // 计算当前应该在哪一行（标题占3行，每个账户占1行）
+            let current_row = 3 + config.accounts.len() as u16 + 1;
             
             execute!(
                 io::stdout(),
@@ -185,13 +214,13 @@ fn display_codes_watch(config: &Config) -> Result<()> {
                 Print("·".repeat(empty)),
                 Print("] "),
                 SetForegroundColor(Color::White),
-                Print(format!("{:02}s remaining", remaining)),
+                Print(format!(" remaining")),
                 ResetColor,
                 terminal::Clear(ClearType::UntilNewLine) // 清除行尾
             )?;
         } else {
             // 多个账户时，清除进度条区域
-            let current_row = 2 + config.accounts.len() as u16 + 1;
+            let current_row = 3 + config.accounts.len() as u16 + 1;
             execute!(
                 io::stdout(),
                 cursor::MoveTo(0, current_row),
@@ -201,12 +230,45 @@ fn display_codes_watch(config: &Config) -> Result<()> {
         
         io::stdout().flush()?;
         
-        // 检查是否有按键输入 (Ctrl+C)
+        // 检查是否有按键输入
         if crossterm::event::poll(Duration::from_millis(100))? {
             if let crossterm::event::Event::Key(key_event) = crossterm::event::read()? {
                 if key_event.code == crossterm::event::KeyCode::Char('c') 
                     && key_event.modifiers.contains(crossterm::event::KeyModifiers::CONTROL) {
                     break;
+                }
+                
+                // 处理数字键复制功能
+                if let crossterm::event::KeyCode::Char(ch) = key_event.code {
+                    if ch.is_ascii_digit() {
+                        let index = ch.to_digit(10).unwrap() as usize;
+                        if index > 0 && index <= config.accounts.len() {
+                            let accounts: Vec<_> = config.accounts.iter().collect();
+                            if let Some((name, account)) = accounts.get(index - 1) {
+                                if let Ok(code) = get_account_code(account) {
+                                    if copy_to_clipboard(&code).is_ok() {
+                                        // 临时显示复制成功消息
+                                        let message_row = 3 + config.accounts.len() as u16 + 2;
+                                        execute!(
+                                            io::stdout(),
+                                            cursor::MoveTo(0, message_row),
+                                            SetForegroundColor(Color::Green),
+                                            Print(format!("✅ 已复制 {} 的验证码: {}", name, code)),
+                                            ResetColor
+                                        )?;
+                                        io::stdout().flush()?;
+                                        // 显示消息1秒后清除
+                                        thread::sleep(Duration::from_millis(1000));
+                                        execute!(
+                                            io::stdout(),
+                                            cursor::MoveTo(0, message_row),
+                                            terminal::Clear(ClearType::UntilNewLine)
+                                        )?;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -253,6 +315,19 @@ fn main() -> Result<()> {
                 } else {
                     println!("Account '{}' not found.", name);
                 }
+            }
+        }
+    } else if let Some(account_name) = cli.copy {
+        // 复制特定账户的验证码
+        if let Some(account) = config.accounts.get(&account_name) {
+            let code = get_account_code(account)?;
+            copy_to_clipboard(&code)?;
+            println!("✅ 已复制 {} 的验证码: {} 到剪贴板", account_name, code);
+        } else {
+            println!("❌ 未找到账户: {}", account_name);
+            println!("\n可用账户:");
+            for name in config.accounts.keys() {
+                println!("- {}", name);
             }
         }
     } else {
