@@ -104,7 +104,8 @@ fn get_account_code(account: &Account) -> Result<String> {
     )
     .context("Failed to decode secret. Is it valid Base32?")?;
 
-    let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, secret_bytes)?;
+    // 使用new_unchecked来允许较短的密钥，兼容Google Authenticator
+    let totp = TOTP::new_unchecked(Algorithm::SHA1, 6, 1, 30, secret_bytes);
     let code = totp.generate_current()?;
     Ok(code)
 }
